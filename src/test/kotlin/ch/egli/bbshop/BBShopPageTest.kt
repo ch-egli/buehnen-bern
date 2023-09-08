@@ -1,5 +1,6 @@
 package ch.egli.bbshop
 
+import com.codeborne.selenide.Config
 import com.codeborne.selenide.Configuration
 import com.codeborne.selenide.Selenide.open
 import com.codeborne.selenide.ex.ElementNotFound
@@ -25,10 +26,14 @@ class BBShopPageTest {
         @JvmStatic
         @BeforeAll
         fun setUpAll() {
-            // Configuration.browserSize = "1280x800"
-            Configuration.headless = true
+            Configuration.browserSize = "1080x800"
+            Configuration.proxyEnabled = false
+            Configuration.proxyHost = "zscaler.sbb.ch"
+            Configuration.proxyPort = 10465
+            // Configuration.headless = true
         }
 
+        private val bbUrl = "https://shop.buehnenbern.ch/SelectSeats?ret=2&e=4050&bts=bs"
         private val logger: Logger = LoggerFactory.getLogger(BBShopPageTest::class.java)
         private const val ALARM_THRESHOLD = 2
         private var isAlarmSet = false
@@ -36,7 +41,7 @@ class BBShopPageTest {
 
     @BeforeEach
     fun setUp() {
-        open("https://shop.buehnenbern.ch/SelectSeats?ret=2&e=3576&bts=bs")
+        open(bbUrl)
         shopPage.cookieButton.click()
     }
 
@@ -45,14 +50,14 @@ class BBShopPageTest {
         logger.info("##### ${getCurrentTimestamp()} -- START")
         var availability = 0
         while (true) {
-            availability = availability("https://shop.buehnenbern.ch/SelectSeats?ret=2&e=3576&bts=bs")
-            logger.info("##### ${getCurrentTimestamp()} -- Anzahl freie Plätze  6.12.: $availability")
-            Thread.sleep(29_500)
+            availability = availability(bbUrl)
+            logger.info("##### ${getCurrentTimestamp()} -- Anzahl freie Plätze  10.09.: $availability")
+            Thread.sleep(57_500)
 
+/*
             availability = availability("https://shop.buehnenbern.ch/SelectSeats?ret=2&e=3577&bts=bs")
             logger.info("##### ${getCurrentTimestamp()} -- Anzahl freie Plätze 10.12.: $availability")
             Thread.sleep(29_500)
-/*
 
             availability = availability("https://shop.buehnenbern.ch/SelectSeats?ret=2&e=3780&bts=bs")
             logger.info("##### ${getCurrentTimestamp()} -- Anzahl freie Plätze 05.12.: $availability")
@@ -100,8 +105,13 @@ class BBShopPageTest {
             val freiePlaetzeKat5 = shopPage.kat5.innerText().substringAfter("Freie Plätze: ")
             val freiePlaetzeKat6 = shopPage.kat6.innerText().substringAfter("Freie Plätze: ")
 
-            numberOfFreePlaces = getFreePlaces(freiePlaetzeKat1) + getFreePlaces(freiePlaetzeKat2) + getFreePlaces(freiePlaetzeKat3) +
-                    getFreePlaces(freiePlaetzeKat4) + getFreePlaces(freiePlaetzeKat5) + getFreePlaces(freiePlaetzeKat6)
+            numberOfFreePlaces =
+                // getFreePlaces(freiePlaetzeKat1) +
+                getFreePlaces(freiePlaetzeKat2) +
+                getFreePlaces(freiePlaetzeKat3) +
+                getFreePlaces(freiePlaetzeKat4) +
+                // getFreePlaces(freiePlaetzeKat5) +
+                getFreePlaces(freiePlaetzeKat6)
         }
         if (numberOfFreePlaces >= ALARM_THRESHOLD && !isAlarmSet) {
             informMe(url)
